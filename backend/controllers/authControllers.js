@@ -43,7 +43,8 @@ export const signup = async (req, res) => {
                 username: newUser.username,
                 fullName: newUser.fullName,
                 email: newUser.email,
-                profilePic: newUser.profilePic,
+                profileImg: newUser.profileImg,
+                coverImg: newUser.coverImg,
                 bio: newUser.bio,
                 link: newUser.link,
                 followers: newUser.followers,
@@ -54,15 +55,61 @@ export const signup = async (req, res) => {
         }
 
     } catch (error) {
-        console.log("Error in signup controller",error.message)
+        console.log("Error in signup controller", error.message)
         res.status(500).json({ message: "Internal server error" })
     }
 }
 
 export const login = async (req, res) => {
+    try {
+        const { email, password } = req.body
 
+        if (!email || !password) {
+            res.status(400).json({ message: "All fields are required" })
+        }
+
+        const user = await User.findOne({ email })
+        const isPasswordCorrect = await bcrypt.compare(password, user.password,)
+
+        if (!user || !isPasswordCorrect) {
+            res.status(400).json({ message: "Invalid Credentials" })
+        }
+
+        generateTokenAndSetCookie(user._id, res)
+
+        res.status(201).json({
+            _id: newUser._id,
+            username: user.username,
+            fullName: user.fullName,
+            email: user.email,
+            profileImg: user.profileImg,
+            coverImg: user.coverImg,
+            bio: user.bio,
+            link: user.link,
+            followers: user.followers,
+            following: user.following
+        })
+
+    } catch (error) {
+        console.log("Error in signup controller", error.message)
+        res.status(500).json({ message: "Internal server error" })
+    }
 }
 
 export const logout = async (req, res) => {
+    try {
+        res.status(200).json({ message: "Logged out successfully" })
+        res.cookie("jwt", "", { maxAge: 0 })
+    } catch (error) {
+        console.log("Error in signup controller", error.message)
+        res.status(500).json({ message: "Internal server error" })
+    }
+}
 
+export const getMe = async (req, res) => {
+    try {
+        const user=await User.findById(req.user._id)
+    } catch (error) {
+        
+    }
 }
